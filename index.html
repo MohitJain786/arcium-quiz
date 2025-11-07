@@ -1,0 +1,573 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcium Quiz - Test Your Knowledge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0c0f1d 0%, #151a32 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .option-button {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .option-button:hover::before {
+            left: 100%;
+        }
+        
+        .correct-answer {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        
+        .incorrect-answer {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        
+        .progress-bar {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .arcium-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Header -->
+    <header class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="https://www.arcium.com/assets/images/logo.png" alt="Arcium Logo" class="w-10 h-10" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMzYzg0RkYiLz4KPHRleHQgeD0iMjAiIHk9IjI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0Ij5BPC90ZXh0Pgo8L3N2Zz4K'">
+                <h1 class="text-2xl font-bold arcium-gradient">Arcium Quiz</h1>
+            </div>
+            <div class="text-sm text-gray-400">
+                <i class="fas fa-user-circle mr-2"></i>Test Your Knowledge
+            </div>
+        </div>
+    </header>
+
+    <!-- Quiz Container -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium">Progress</span>
+                <span class="text-sm font-medium" id="progressText">0 / 8</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+                <div class="progress-bar bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Score Display -->
+        <div class="glass-effect rounded-xl p-6 mb-8 fade-in">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold mb-1">Your Score</h2>
+                    <p class="text-3xl font-bold arcium-gradient" id="scoreDisplay">0 / 8</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-400 mb-2">Accuracy</p>
+                    <p class="text-2xl font-bold" id="accuracyDisplay">0%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Questions -->
+        <div id="quizContainer">
+            <!-- Question 1 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="1">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/hero.png" alt="Arcium Hero" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">What is Arcium's primary mission in the crypto space?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> To create a centralized exchange platform
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> To enable confidential computing for blockchain applications
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> To build a traditional NFT marketplace
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> To develop gaming metaverses
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="2" style="display: none;">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/technology.png" alt="Technology" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">What core technology does Arcium use to ensure data confidentiality?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> Zero-Knowledge Proofs exclusively
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> Multi-Party Computation (MPC)
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> Fully Homomorphic Encryption only
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> Simple encryption
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="3" style="display: none;">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/network.png" alt="Network" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">Which blockchain ecosystem is Arcium primarily designed for?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> Bitcoin only
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> Ethereum exclusively
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> Solana solely
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> Multi-chain ecosystem
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="4" style="display: none;">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/token.png" alt="Token" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">What is the name of Arcium's native token?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> ARX
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> ARC
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> ARCM
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> ACX
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="5" style="display: none;">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/defi.png" alt="DeFi" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">What makes Arcium's approach unique for DeFi applications?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> It only supports public lending protocols
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> It enables confidential smart contract execution
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> It focuses exclusively on NFTs
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> It only works with centralized stablecoins
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="6" style="display: none;">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/nodes.png" alt="Nodes" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">What is the primary role of nodes in the Arcium network?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> They only validate public transactions
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> They execute confidential computations using MPC
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> They mint unlimited tokens
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> They only store public data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="7" style="display: none;">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/compliance.png" alt="Compliance" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">How does Arcium approach regulatory compliance?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> It ignores all regulations
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> It provides built-in compliance features for institutions
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> It operates only in unregulated regions
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> It bans all corporate users
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="question-card glass-effect rounded-xl p-8 mb-6 fade-in card-hover" data-question="8" style="display: none;">
+                <div class="flex items-start space-x-4">
+                    <img src="https://www.arcium.com/assets/images/enterprise.png" alt="Enterprise" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none'">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold mb-4">What is Arcium's main value proposition for enterprises?</h3>
+                        <div class="space-y-3">
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="a">
+                                <span class="font-medium">A)</span> Free token airdrops
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="b">
+                                <span class="font-medium">B)</span> Confidential data processing without exposing trade secrets
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="c">
+                                <span class="font-medium">C)</span> High-frequency trading tools only
+                            </button>
+                            <button class="option-button w-full text-left p-4 rounded-lg border border-gray-600 hover:border-blue-400" data-answer="d">
+                                <span class="font-medium">D)</span> Social media integrations
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center mt-8" id="navButtons">
+            <button id="prevBtn" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fas fa-arrow-left mr-2"></i>Previous
+            </button>
+            
+            <button id="nextBtn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition-all duration-200 pulse-animation" style="display: none;">
+                Next<i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="glass-effect rounded-xl p-8 text-center fade-in" style="display: none;">
+            <div class="mb-6">
+                <i class="fas fa-trophy text-6xl arcium-gradient mb-4"></i>
+                <h2 class="text-3xl font-bold mb-2">Quiz Complete!</h2>
+                <p class="text-xl">You scored <span class="arcium-gradient font-bold" id="finalScore">0</span> out of 8</p>
+            </div>
+            
+            <div class="mb-8">
+                <div class="text-6xl font-bold arcium-gradient mb-2" id="percentageScore">0%</div>
+                <p class="text-gray-400">Accuracy Rate</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="restartBtn" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg font-medium transition-all duration-200">
+                    <i class="fas fa-redo mr-2"></i>Try Again
+                </button>
+                
+                <button id="shareBtn" class="px-8 py-3 bg-black hover:bg-gray-800 rounded-lg font-medium transition-all duration-200 border border-gray-700">
+                    <i class="fab fa-x-twitter mr-2"></i>Share on X
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="container mx-auto px-4 py-8 mt-12 border-t border-gray-800">
+        <div class="text-center text-gray-400">
+            <p>&copy; 2024 Arcium Quiz. Inspired by <a href="https://www.arcium.com/" target="_blank" class="text-blue-400 hover:underline">arcium.com</a>. Built for the crypto community.</p>
+        </div>
+    </footer>
+
+    <script>
+        class QuizApp {
+            constructor() {
+                this.currentQuestion = 1;
+                this.score = 0;
+                this.answers = {};
+                this.totalQuestions = 8;
+                
+                this.correctAnswers = {
+                    1: 'b',  // Confidential computing
+                    2: 'b',  // MPC
+                    3: 'd',  // Multi-chain
+                    4: 'a',  // ARX
+                    5: 'b',  // Confidential smart contracts
+                    6: 'b',  // Execute confidential computations
+                    7: 'b',  // Built-in compliance
+                    8: 'b'   // Confidential data processing
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.updateProgress();
+                this.updateScore();
+                this.showQuestion(1);
+            }
+            
+            bindEvents() {
+                document.querySelectorAll('.option-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.selectAnswer(e));
+                });
+                
+                document.getElementById('prevBtn').addEventListener('click', () => this.previousQuestion());
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextQuestion());
+                document.getElementById('restartBtn').addEventListener('click', () => this.restartQuiz());
+                document.getElementById('shareBtn').addEventListener('click', () => this.shareResults());
+            }
+            
+            selectAnswer(e) {
+                const button = e.currentTarget;
+                const questionCard = button.closest('.question-card');
+                const questionNum = parseInt(questionCard.dataset.question);
+                
+                if (questionCard.classList.contains('answered')) return;
+                
+                questionCard.classList.add('answered');
+                const selectedAnswer = button.dataset.answer;
+                this.answers[questionNum] = selectedAnswer;
+                
+                const isCorrect = selectedAnswer === this.correctAnswers[questionNum];
+                if (isCorrect) this.score++;
+                
+                this.showFeedback(questionCard, selectedAnswer, isCorrect);
+                this.updateScore();
+                
+                document.getElementById('nextBtn').style.display = 'inline-flex';
+                
+                if (this.currentQuestion === this.totalQuestions) {
+                    setTimeout(() => this.showResults(), 1500);
+                }
+                
+                this.updateNavigation();
+            }
+            
+            showFeedback(questionCard, selectedAnswer, isCorrect) {
+                const buttons = questionCard.querySelectorAll('.option-button');
+                const correctAnswer = this.correctAnswers[parseInt(questionCard.dataset.question)];
+                
+                buttons.forEach(btn => {
+                    const answer = btn.dataset.answer;
+                    btn.disabled = true;
+                    btn.style.cursor = 'not-allowed';
+                    
+                    if (answer === correctAnswer) {
+                        btn.classList.add('correct-answer');
+                        if (btn.innerHTML.includes('<i class="fas fa-check-circle')) return;
+                        btn.innerHTML += ' <i class="fas fa-check-circle ml-2"></i>';
+                    } else if (answer === selectedAnswer && !isCorrect) {
+                        btn.classList.add('incorrect-answer');
+                        if (btn.innerHTML.includes('<i class="fas fa-times-circle')) return;
+                        btn.innerHTML += ' <i class="fas fa-times-circle ml-2"></i>';
+                    }
+                });
+            }
+            
+            previousQuestion() {
+                if (this.currentQuestion > 1) {
+                    this.hideQuestion(this.currentQuestion);
+                    this.currentQuestion--;
+                    this.showQuestion(this.currentQuestion);
+                    this.updateProgress();
+                    this.updateNavigation();
+                }
+            }
+            
+            nextQuestion() {
+                if (this.currentQuestion < this.totalQuestions && document.querySelector(`[data-question="${this.currentQuestion}"]`).classList.contains('answered')) {
+                    this.hideQuestion(this.currentQuestion);
+                    this.currentQuestion++;
+                    this.showQuestion(this.currentQuestion);
+                    this.updateProgress();
+                    this.updateNavigation();
+                }
+            }
+            
+            hideQuestion(questionNum) {
+                document.querySelector(`[data-question="${questionNum}"]`).style.display = 'none';
+            }
+            
+            showQuestion(questionNum) {
+                const questionCard = document.querySelector(`[data-question="${questionNum}"]`);
+                questionCard.style.display = 'block';
+                questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                questionCard.classList.add('fade-in');
+            }
+            
+            updateProgress() {
+                const answered = Object.keys(this.answers).length;
+                const progress = (answered / this.totalQuestions) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent = `${answered} / ${this.totalQuestions}`;
+            }
+            
+            updateScore() {
+                const answered = Object.keys(this.answers).length;
+                document.getElementById('scoreDisplay').textContent = `${this.score} / ${answered}`;
+                const accuracy = answered > 0 ? Math.round((this.score / answered) * 100) : 0;
+                document.getElementById('accuracyDisplay').textContent = `${accuracy}%`;
+            }
+            
+            updateNavigation() {
+                document.getElementById('prevBtn').disabled = this.currentQuestion === 1;
+                const currentAnswered = document.querySelector(`[data-question="${this.currentQuestion}"]`).classList.contains('answered');
+                document.getElementById('nextBtn').style.display = currentAnswered && this.currentQuestion < this.totalQuestions ? 'inline-flex' : 'none';
+            }
+            
+            showResults() {
+                document.getElementById('quizContainer').style.display = 'none';
+                document.getElementById('navButtons').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'block';
+                
+                document.getElementById('finalScore').textContent = `${this.score}`;
+                const percentage = Math.round((this.score / this.totalQuestions) * 100);
+                document.getElementById('percentageScore').textContent = `${percentage}%`;
+                
+                setTimeout(() => {
+                    document.getElementById('percentageScore').classList.add('pulse-animation');
+                }, 500);
+            }
+            
+            restartQuiz() {
+                this.currentQuestion = 1;
+                this.score = 0;
+                this.answers = {};
+                
+                document.getElementById('resultsSection').style.display = 'none';
+                document.getElementById('quizContainer').style.display = 'block';
+                document.getElementById('navButtons').style.display = 'flex';
+                
+                document.querySelectorAll('.question-card').forEach((card, index) => {
+                    card.style.display = index + 1 === 1 ? 'block' : 'none';
+                    card.classList.remove('answered');
+                    const buttons = card.querySelectorAll('.option-button');
+                    buttons.forEach(btn => {
+                        btn.classList.remove('correct-answer', 'incorrect-answer');
+                        btn.disabled = false;
+                        btn.style.cursor = 'pointer';
+                        const icon = btn.querySelector('i');
+                        if (icon) icon.remove();
+                    });
+                });
+                
+                this.updateProgress();
+                this.updateScore();
+                this.updateNavigation();
+                this.showQuestion(1);
+            }
+            
+            shareResults() {
+                const percentage = Math.round((this.score / this.totalQuestions) * 100);
+                const text = `I scored ${this.score}/8 (${percentage}%) on the Arcium Quiz! 🚀 Learn about confidential computing in crypto: ${window.location.origin}${window.location.pathname}`;
+                const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                window.open(xUrl, '_blank', 'width=600,height=400');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new QuizApp();
+        });
+    </script>
+</body>
+</html>
+```
